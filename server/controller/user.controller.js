@@ -1,5 +1,6 @@
 const User = require("../models/user.models");
 const bcryptjs = require("bcryptjs");
+const validateMongodbId = require("../utils/validateMongodb");
 const jwt = require("jsonwebtoken");
 const registerUser = async (req, res) => {
   try {
@@ -94,13 +95,14 @@ const getAllUser = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
+  const { role } = req.user;
+  if (role !== "admin")
+    return res
+      .status(401)
+      .json({ message: "Unauthorized user admin", success: false });
   try {
     const { id } = req.params;
-    const { role } = req.user;
-    if (role !== "admin")
-      return res
-        .status(401)
-        .json({ message: "Unauthorized user admin", success: false });
+    validateMongodbId(id);
     const user = await User.findById(id);
     res.status(200).json(user);
   } catch (error) {
@@ -120,8 +122,8 @@ const deleteUserBydId = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id } = req.user;
-    const { firstname, lastname, email, mobile, password } = req.body;
-    const hashedPassword = bcryptjs.hashSync(password, 10);
+    validateMongodbId(id);
+    const { firstname, lastname, email, mobile } = req.body;
     const updateUser = await User.findByIdAndUpdate(
       id,
       {
@@ -130,7 +132,6 @@ const updateUser = async (req, res) => {
           lastname,
           email,
           mobile,
-          password: hashedPassword,
         },
       },
       { new: true }
@@ -148,6 +149,7 @@ const blockUser = async (req, res) => {
       .json({ message: "Unauthorized user admin", success: false });
   try {
     const { id } = req.params;
+    validateMongodbId(id);
     const blockUser = await User.findByIdAndUpdate(
       id,
       {
@@ -170,6 +172,7 @@ const unBlockUser = async (req, res) => {
       .json({ message: "Unauthorized user admin", success: false });
   try {
     const { id } = req.params;
+    validateMongodbId(id);
     const unBlockUser = await User.findByIdAndUpdate(
       id,
       {
