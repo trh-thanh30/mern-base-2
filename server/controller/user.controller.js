@@ -96,6 +96,11 @@ const getAllUser = async (req, res) => {
 const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
+    const { role } = req.user;
+    if (role !== "admin")
+      return res
+        .status(401)
+        .json({ message: "Unauthorized user admin", success: false });
     const user = await User.findById(id);
     res.status(200).json(user);
   } catch (error) {
@@ -114,8 +119,9 @@ const deleteUserBydId = async (req, res) => {
 };
 const updateUser = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { firstname, lastname, email, mobile } = req.body;
+    const { id } = req.user;
+    const { firstname, lastname, email, mobile, password } = req.body;
+    const hashedPassword = bcryptjs.hashSync(password, 10);
     const updateUser = await User.findByIdAndUpdate(
       id,
       {
@@ -124,6 +130,7 @@ const updateUser = async (req, res) => {
           lastname,
           email,
           mobile,
+          password: hashedPassword,
         },
       },
       { new: true }
@@ -133,6 +140,50 @@ const updateUser = async (req, res) => {
     res.status(500).json({ message: error.message, success: false });
   }
 };
+const blockUser = async (req, res) => {
+  const { role } = req.user;
+  if (role !== "admin")
+    return res
+      .status(401)
+      .json({ message: "Unauthorized user admin", success: false });
+  try {
+    const { id } = req.params;
+    const blockUser = await User.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          isBlocked: true,
+        },
+      },
+      { new: true }
+    );
+    res.status(200).json({ message: "User blocked", success: true });
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+const unBlockUser = async (req, res) => {
+  const { role } = req.user;
+  if (role !== "admin")
+    return res
+      .status(401)
+      .json({ message: "Unauthorized user admin", success: false });
+  try {
+    const { id } = req.params;
+    const unBlockUser = await User.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          isBlocked: false,
+        },
+      },
+      { new: true }
+    );
+    res.status(200).json({ message: "User unblocked", success: true });
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
 module.exports = {
   registerUser,
   loginUser,
@@ -140,4 +191,6 @@ module.exports = {
   getUserById,
   deleteUserBydId,
   updateUser,
+  blockUser,
+  unBlockUser,
 };
