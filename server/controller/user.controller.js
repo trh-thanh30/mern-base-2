@@ -112,10 +112,32 @@ const deleteUserBydId = async (req, res) => {
     res.status(500).json({ message: error.message, success: false });
   }
 };
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { firstname, lastname, email, mobile } = req.body;
+    const updateUser = await User.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          firstname,
+          lastname,
+          email,
+          mobile,
+        },
+      },
+      { new: true }
+    );
+    res.status(200).json(updateUser);
+  } catch (error) {
+    res.status(500).json({ message: error.message, success: false });
+  }
+};
 module.exports = {
   registerUser,
   loginUser,
   getAllUser,
   getUserById,
   deleteUserBydId,
+  updateUser,
 };
