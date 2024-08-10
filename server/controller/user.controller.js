@@ -102,4 +102,20 @@ const getUserById = async (req, res) => {
     res.status(500).json({ message: error.message, success: false });
   }
 };
-module.exports = { registerUser, loginUser, getAllUser, getUserById };
+
+const deleteUserBydId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleteUser = await User.findByIdAndDelete(id);
+    res.status(200).json(deleteUser);
+  } catch (error) {
+    res.status(500).json({ message: error.message, success: false });
+  }
+};
+module.exports = {
+  registerUser,
+  loginUser,
+  getAllUser,
+  getUserById,
+  deleteUserBydId,
+};
