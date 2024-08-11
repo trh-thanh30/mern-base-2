@@ -3,11 +3,13 @@ const app = express();
 const mongoose = require("mongoose");
 const coockieParser = require("cookie-parser");
 const dotenv = require("dotenv");
+const morgan = require("morgan");
 const authRouter = require("./routes/user.route.js");
 const productRouter = require("./routes/product.route.js");
 const { notFound, errorHandler } = require("./middlewares/errorHanlder.js");
 
 dotenv.config();
+app.use(morgan('dev'));
 app.use(express.json());
 app.use(coockieParser());
 
