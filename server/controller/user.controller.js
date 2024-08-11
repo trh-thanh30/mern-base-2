@@ -187,6 +187,19 @@ const unBlockUser = async (req, res) => {
     return res.status(500).json({ message: error.message, success: false });
   }
 };
+const logout = (req, res) => {
+  try {
+    res
+      .clearCookie("access_token", {
+        sameSite: "none",
+        secure: true,
+      })
+      .status(200)
+      .json({ message: "Logout success" });
+  } catch (error) {
+    res.status(500).json({ message: error.message, success: false });
+  }
+};
 module.exports = {
   registerUser,
   loginUser,
@@ -196,4 +209,5 @@ module.exports = {
   updateUser,
   blockUser,
   unBlockUser,
+  logout,
 };

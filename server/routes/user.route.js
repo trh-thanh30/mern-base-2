@@ -8,6 +8,8 @@ const {
   updateUser,
   blockUser,
   unBlockUser,
+  handleRefreshToken,
+  logout,
 } = require("../controller/user.controller");
 const verifyToken = require("../middlewares/verifyToken");
 const router = express.Router();
@@ -19,4 +21,5 @@ router.delete("/delete-user/:id", deleteUserBydId);
 router.put("/update-user", verifyToken, updateUser);
 router.put("/block-user/:id", verifyToken, blockUser);
 router.put("/unblock-user/:id", verifyToken, unBlockUser);
+router.get("/logout", logout);
 module.exports = router;
