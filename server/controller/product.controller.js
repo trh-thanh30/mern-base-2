@@ -59,4 +59,13 @@ const createProduct = async (req, res) => {
     res.status(500).json({ message: error.message, success: false });
   }
 };
-module.exports = { createProduct };
+const getProduct = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const findProduct = await Product.findById(id);
+    res.status(200).json(findProduct);
+  } catch (error) {
+    res.status(500).json({ message: error.message, success: false });
+  }
+};
+module.exports = { createProduct, getProduct };
