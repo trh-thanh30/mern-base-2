@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const coockieParser = require("cookie-parser");
 const dotenv = require("dotenv");
 const authRouter = require("./routes/user.route.js");
+const productRouter = require("./routes/product.route.js");
 const { notFound, errorHandler } = require("./middlewares/errorHanlder.js");
 
 dotenv.config();
@@ -21,6 +22,7 @@ mongoose
   });
 
 app.use("/api/user", authRouter);
+app.use("/api/product", productRouter);
 
 app.use(notFound);
 app.use(errorHandler);
