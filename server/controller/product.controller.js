@@ -109,4 +109,24 @@ const updateProduct = async (req, res) => {
     res.status(500).json({ message: error.message, success: false });
   }
 };
-module.exports = { createProduct, getProduct, getAllProduct, updateProduct };
+const deleteProduct = async (req, res) => {
+  const { role } = req.user;
+  const { id } = req.params;
+  if (role !== "admin")
+    return res
+      .status(401)
+      .json({ message: "Unauthorized user admin", success: false });
+  try {
+    const deleteProduct = await Product.findByIdAndDelete(id);
+    res.status(200).json({ message: "Product deleted", success: true });
+  } catch (error) {
+    res.status(500).json({ message: error.message, success: false });
+  }
+};
+module.exports = {
+  createProduct,
+  getProduct,
+  getAllProduct,
+  updateProduct,
+  deleteProduct,
+};
