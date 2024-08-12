@@ -48,5 +48,21 @@ const updateCategory = async (req, res) => {
     return res.status(400).json({ message: error.message, success: false });
   }
 };
-
-module.exports = { createCategory, updateCategory };
+const deleteCategory = async (req, res) => {
+  const { role } = req.user;
+  const { id } = req.params;
+  if (role !== "admin")
+    return res
+      .status(401)
+      .json({ message: "Unauthorized user admin", success: false });
+  validateMongodbId(id);
+  try {
+    const deleteCategory = await Category.findByIdAndDelete(id);
+    return res
+      .status(200)
+      .json({ message: "Category deleted successfully", deleteCategory });
+  } catch (err) {
+    return res.status(500).json({ message: err.message, success: false });
+  }
+};
+module.exports = { createCategory, updateCategory, deleteCategory };
