@@ -1,5 +1,6 @@
 const Product = require("../models/product.models");
 const slugify = require("slugify");
+const User = require("../models/user.models");
 const createProduct = async (req, res) => {
   const { role } = req.user;
   if (role !== "admin") {
@@ -159,10 +160,97 @@ const deleteProduct = async (req, res) => {
     res.status(500).json({ message: error.message, success: false });
   }
 };
+const addToWishList = async (req, res) => {
+  const { id } = req.user;
+  const { productId } = req.body;
+  try {
+    const user = await User.findById(id);
+    const alreadyAdded = user.wishlist.find(
+      (id) => id.toString() === productId
+    );
+    if (alreadyAdded) {
+      let user = await User.findByIdAndUpdate(
+        id,
+        {
+          $pull: { wishlist: productId },
+        },
+        { new: true }
+      );
+      res.status(200).json({
+        message: "Product removed from wishlist",
+        success: true,
+      });
+    } else {
+      let user = await User.findByIdAndUpdate(
+        id,
+        {
+          $push: {
+            wishlist: productId,
+          },
+        },
+        {
+          new: true,
+        }
+      );
+      res.status(200).json({
+        message: "Product added to wishlist",
+        success: true,
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+const rating = async (req, res) => {
+  const { id } = req.user;
+  const { star, productId } = req.body;
+  try {
+    const product = await Product.findById(productId);
+    let alreadyRated = product.ratings.find(
+      (userId) => userId.postedby.toString() === id.toString()
+    );
+    if (alreadyRated) {
+      const updateRating = await Product.updateOne(
+        {
+          ratings: {
+            $elemMatch: alreadyRated,
+          },
+        },
+        {
+          $set: {
+            "ratings.$.star": star,
+          },
+        },
+        {
+          new: true,
+        }
+      );
+      res.status(200).json(updateRating);
+    } else {
+      const rateProduct = await Product.findByIdAndUpdate(
+        productId,
+        {
+          $push: {
+            ratings: {
+              star: star,
+              postedby: id,
+            },
+          },
+        },
+        { new: true }
+      );
+      res.status(200).json(rateProduct);
+    }
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
 module.exports = {
   createProduct,
   getProduct,
   getAllProduct,
   updateProduct,
   deleteProduct,
+  addToWishList,
+  rating,
 };

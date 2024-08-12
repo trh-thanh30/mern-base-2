@@ -38,12 +38,7 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please enter product color"],
     },
-    ratings: [
-      {
-        star: Number,
-        postedby: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-      },
-    ],
+
     brand: {
       type: String,
       required: [true, "Please enter product brand"],
@@ -55,6 +50,16 @@ const productSchema = new mongoose.Schema(
     userId: {
       type: String,
       required: true,
+    },
+    ratings: [
+      {
+        star: Number,
+        postedby: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      },
+    ],
+    totalrating: {
+      type: String,
+      default: 0,
     },
   },
   { timestamps: true }
