@@ -72,4 +72,21 @@ const updateCoupon = async (req, res) => {
     return res.status(500).json({ message: error.message, success: false });
   }
 };
-module.exports = { createCoupon, getAllCoupons, updateCoupon };
+const deleteCoupon = async (req, res) => {
+  const { role } = req.user;
+  if (role !== "admin")
+    return res
+      .status(401)
+      .json({ message: "Unauthorized user admin", success: false });
+  const { id } = req.params;
+  validateMongodbId(id);
+  try {
+    const deleteCoupon = await Coupon.findByIdAndDelete(id);
+    res
+      .status(204)
+      .json({ message: "Coupon deleted", success: true, deleteCoupon });
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+module.exports = { createCoupon, getAllCoupons, updateCoupon, deleteCoupon };
