@@ -50,15 +50,13 @@ const getBlog = async (req, res) => {
   const { id } = req.params;
   validateMongodbId(id);
   try {
-    const blog = await Blog.findById(id);
+    const blog = await Blog.findById(id).populate("likes").populate("dislikes");
     const updateViews = await Blog.findByIdAndUpdate(
       id,
       { $inc: { numViews: 1 } },
       { new: true }
     );
-    return res
-      .status(200)
-      .json({ message: "Blog found", success: true, updateViews });
+    return res.status(200).json({ message: "Blog found", success: true, blog });
   } catch (error) {
     return res.status(404).json({ message: error.message, success: false });
   }
@@ -95,13 +93,14 @@ const likeBlog = async (req, res) => {
   // Find the blog which you want to liked
   const blog = await Blog.findById(blogId);
   // Find the login user
-  const loginUserId = req?.user?._id;
+  const loginUserId = req?.user?.id;
   // Find if the user has liked the blog
   const isLiked = blog?.isLiked;
   // Find the user has dislike the blog
   const alreadyDisLiked = blog?.dislikes?.find(
-    (userId = userId?.toString() === loginUserId?.toString())
+    (userId) => userId?.toString() === loginUserId?.toString()
   );
+
   if (alreadyDisLiked) {
     const blog = await Blog.findByIdAndUpdate(
       blogId,
@@ -137,6 +136,57 @@ const likeBlog = async (req, res) => {
     res.status(200).json(blog);
   }
 };
+
+const disLikeBlog = async (req, res) => {
+  const { blogId } = req.body;
+  validateMongodbId(blogId);
+
+  // Find the blog which you want to liked
+  const blog = await Blog.findById(blogId);
+  // Find the login user
+  const loginUserId = req?.user?.id;
+  // Find if the user has liked the blog
+  const isDisLiked = blog?.isDisliked;
+  // Find the user has dislike the blog
+  const alreadyLiked = blog?.likes?.find(
+    (userId) => userId?.toString() === loginUserId?.toString()
+  );
+
+  if (alreadyLiked) {
+    const blog = await Blog.findByIdAndUpdate(
+      blogId,
+      {
+        $pull: { likes: loginUserId },
+        isliked: false,
+      },
+      { new: true }
+    );
+
+    res.status(200).json(blog);
+  }
+
+  if (isDisLiked) {
+    const blog = await Blog.findByIdAndUpdate(
+      blogId,
+      {
+        $pull: { dislikes: loginUserId },
+        isDisliked: false,
+      },
+      { new: true }
+    );
+    res.status(200).json(blog);
+  } else {
+    const blog = await Blog.findByIdAndUpdate(
+      blogId,
+      {
+        $push: { dislikes: loginUserId },
+        isDisliked: true,
+      },
+      { new: true }
+    );
+    res.status(200).json(blog);
+  }
+};
 module.exports = {
   createBlog,
   updateBlog,
@@ -144,4 +194,5 @@ module.exports = {
   getAllBlogs,
   deleteBlog,
   likeBlog,
+  disLikeBlog,
 };
