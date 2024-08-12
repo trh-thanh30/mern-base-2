@@ -65,4 +65,19 @@ const deleteCategory = async (req, res) => {
     return res.status(500).json({ message: err.message, success: false });
   }
 };
-module.exports = { createCategory, updateCategory, deleteCategory };
+const getCategory = async (req, res) => {
+  const { id } = req.params;
+  validateMongodbId(id);
+  try {
+    const getCategory = await Category.findById(id);
+    return res.status(200).json({ getCategory });
+  } catch (error) {
+    return res.status(400).json({ message: error.message, success: false });
+  }
+};
+module.exports = {
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  getCategory,
+};
