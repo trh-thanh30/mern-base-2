@@ -41,6 +41,11 @@ const createCoupon = async (req, res) => {
   }
 };
 const getAllCoupons = async (req, res) => {
+  const { role } = req.user;
+  if (role !== "admin")
+    return res
+      .status(401)
+      .json({ message: "Unauthorized user admin", success: false });
   try {
     const coupons = await Coupon.find();
     res.status(200).json({ message: "All coupons", success: true, coupons });
@@ -48,4 +53,23 @@ const getAllCoupons = async (req, res) => {
     res.status(500).json({ message: error.message, success: false });
   }
 };
-module.exports = { createCoupon, getAllCoupons };
+const updateCoupon = async (req, res) => {
+  const { role } = req.user;
+  if (role !== "admin")
+    return res
+      .status(401)
+      .json({ message: "Unauthorized user admin", success: false });
+  const { id } = req.params;
+  validateMongodbId(id);
+  try {
+    const updateCoupon = await Coupon.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+    res
+      .status(200)
+      .json({ message: "Coupon updated", success: true, updateCoupon });
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+module.exports = { createCoupon, getAllCoupons, updateCoupon };
