@@ -29,5 +29,24 @@ const createCategory = async (req, res) => {
     res.status(500).json({ message: error.message, success: false });
   }
 };
+const updateCategory = async (req, res) => {
+  const { role } = req.user;
+  const { id } = req.params;
+  if (role !== "admin")
+    return res
+      .status(401)
+      .json({ message: "Unauthorized user admin", success: false });
+  validateMongodbId(id);
+  try {
+    const updateCategory = await Category.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+    return res
+      .status(200)
+      .json({ message: "Category updated successfully", updateCategory });
+  } catch (error) {
+    return res.status(400).json({ message: error.message, success: false });
+  }
+};
 
-module.exports = { createCategory };
+module.exports = { createCategory, updateCategory };
