@@ -1,3 +1,4 @@
+const Coupon = require("../models/coupon.models");
 const validateMongodbId = require("../utils/validateMongodb");
 
 const createCoupon = async (req, res) => {
@@ -39,5 +40,12 @@ const createCoupon = async (req, res) => {
     res.status(500).json({ message: error.message, success: false });
   }
 };
-
-module.exports = { createCoupon };
+const getAllCoupons = async (req, res) => {
+  try {
+    const coupons = await Coupon.find();
+    res.status(200).json({ message: "All coupons", success: true, coupons });
+  } catch (error) {
+    res.status(500).json({ message: error.message, success: false });
+  }
+};
+module.exports = { createCoupon, getAllCoupons };
