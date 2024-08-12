@@ -225,7 +225,6 @@ const rating = async (req, res) => {
           new: true,
         }
       );
-      res.status(200).json(updateRating);
     } else {
       const rateProduct = await Product.findByIdAndUpdate(
         productId,
@@ -239,12 +238,26 @@ const rating = async (req, res) => {
         },
         { new: true }
       );
-      res.status(200).json(rateProduct);
     }
+    const getallrating = await Product.findById(productId);
+    let totalRating = getallrating.ratings.length;
+    let ratingsum = getallrating.ratings
+      .map((item) => item.star)
+      .reduce((a, b) => a + b, 0);
+    let actualRating = Math.round(ratingsum / totalRating);
+    let finalproduct = await Product.findByIdAndUpdate(
+      productId,
+      {
+        totalrating: actualRating,
+      },
+      { new: true }
+    );
+    res.json(finalproduct);
   } catch (error) {
     return res.status(500).json({ message: error.message, success: false });
   }
 };
+
 module.exports = {
   createProduct,
   getProduct,
