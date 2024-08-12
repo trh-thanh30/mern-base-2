@@ -6,10 +6,11 @@ const dotenv = require("dotenv");
 const morgan = require("morgan");
 const authRouter = require("./routes/user.route.js");
 const productRouter = require("./routes/product.route.js");
+const blogRouter = require("./routes/blog.route.js");
 const { notFound, errorHandler } = require("./middlewares/errorHanlder.js");
 
 dotenv.config();
-app.use(morgan('dev'));
+app.use(morgan("dev"));
 app.use(express.json());
 app.use(coockieParser());
 
@@ -25,6 +26,7 @@ mongoose
 
 app.use("/api/user", authRouter);
 app.use("/api/product", productRouter);
+app.use("/api/blog", blogRouter);
 
 app.use(notFound);
 app.use(errorHandler);
