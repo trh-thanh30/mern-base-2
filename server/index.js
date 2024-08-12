@@ -9,6 +9,7 @@ const productRouter = require("./routes/product.route.js");
 const blogRouter = require("./routes/blog.route.js");
 const categoryRouter = require("./routes/category.route.js");
 const categoryBlogRouter = require("./routes/blog-category.route.js");
+const brandRouter = require("./routes/brand.route.js");
 const { notFound, errorHandler } = require("./middlewares/errorHanlder.js");
 
 dotenv.config();
@@ -31,6 +32,7 @@ app.use("/api/product", productRouter);
 app.use("/api/blog", blogRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/blog-category", categoryBlogRouter);
+app.use("/api/brand", brandRouter);
 
 app.use(notFound);
 app.use(errorHandler);
