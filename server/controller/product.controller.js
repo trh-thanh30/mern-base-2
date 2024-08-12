@@ -203,7 +203,7 @@ const addToWishList = async (req, res) => {
 };
 const rating = async (req, res) => {
   const { id } = req.user;
-  const { star, productId } = req.body;
+  const { star, productId, comment } = req.body;
   try {
     const product = await Product.findById(productId);
     let alreadyRated = product.ratings.find(
@@ -219,6 +219,7 @@ const rating = async (req, res) => {
         {
           $set: {
             "ratings.$.star": star,
+            "ratings.$.comment": comment,
           },
         },
         {
@@ -232,6 +233,7 @@ const rating = async (req, res) => {
           $push: {
             ratings: {
               star: star,
+              comment: comment,
               postedby: id,
             },
           },
