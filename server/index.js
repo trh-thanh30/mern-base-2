@@ -7,6 +7,7 @@ const morgan = require("morgan");
 const authRouter = require("./routes/user.route.js");
 const productRouter = require("./routes/product.route.js");
 const blogRouter = require("./routes/blog.route.js");
+const categoryRouter = require("./routes/category.route.js");
 const { notFound, errorHandler } = require("./middlewares/errorHanlder.js");
 
 dotenv.config();
@@ -27,6 +28,7 @@ mongoose
 app.use("/api/user", authRouter);
 app.use("/api/product", productRouter);
 app.use("/api/blog", blogRouter);
+app.use("/api/category", categoryRouter);
 
 app.use(notFound);
 app.use(errorHandler);
