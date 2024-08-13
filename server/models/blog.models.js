@@ -37,11 +37,13 @@ const blogSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    image: {
-      type: String,
-      default:
-        "https://cloud.z.com/vn/wp-content/uploads/2023/11/how-to-write-a-blog-post.jpeg",
-    },
+    images: [
+      {
+        type: String,
+        default:
+          "https://cloud.z.com/vn/wp-content/uploads/2023/11/how-to-write-a-blog-post.jpeg",
+      },
+    ],
     author: {
       type: String,
       default: "Admin",

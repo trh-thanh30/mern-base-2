@@ -27,9 +27,7 @@ const uploadPhoto = multer({
 
 const productImgResize = async (req, res, next) => {
   if (!req.files) return next();
-
   const productImagePath = path.join(__dirname, "../public/images/products");
-
   // Ensure the directory exists, create it if it doesn't
   if (!fs.existsSync(productImagePath)) {
     fs.mkdirSync(productImagePath, { recursive: true });
@@ -38,13 +36,13 @@ const productImgResize = async (req, res, next) => {
   await Promise.all(
     req.files.map(async (file) => {
       const outputFilePath = path.join(productImagePath, file.filename);
-
       try {
         await sharp(file.path)
           .resize(300, 300)
           .toFormat("jpeg")
           .jpeg({ quality: 90 })
           .toFile(outputFilePath);
+        fs.unlinkSync(outputFilePath);
       } catch (err) {
         console.error(`Failed to process image: ${file.filename}`, err);
         return next(err); // Pass the error to the next middleware
@@ -57,15 +55,28 @@ const productImgResize = async (req, res, next) => {
 
 const blogImgResize = async (req, res, next) => {
   if (!req.files) return next();
+  const blogsImagePath = path.join(__dirname, "../public/images/blogs");
+  // Ensure the directory exists, create it if it doesn't
+  if (!fs.existsSync(blogsImagePath)) {
+    fs.mkdirSync(blogsImagePath, { recursive: true });
+  }
+
   await Promise.all(
     req.files.map(async (file) => {
-      await sharp(file.path)
-        .resize(300, 300)
-        .toFormat("jpeg")
-        .jpeg({ quality: 90 })
-        .toFile(`public/images/blogs/${file.filename}`);
+      const outputFilePath = path.join(blogsImagePath, file.filename);
+      try {
+        await sharp(file.path)
+          .resize(300, 300)
+          .toFormat("jpeg")
+          .jpeg({ quality: 90 })
+          .toFile(outputFilePath);
+      } catch (err) {
+        console.error(`Failed to process image: ${file.filename}`, err);
+        return next(err);
+      }
     })
   );
+
   next();
 };
 

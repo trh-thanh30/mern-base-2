@@ -3,6 +3,7 @@ const slugify = require("slugify");
 const User = require("../models/user.models");
 const validateMongodbId = require("../utils/validateMongodb");
 const cloudinaryUploadImg = require("../utils/cloudinary");
+const fs = require("fs");
 const createProduct = async (req, res) => {
   const { role } = req.user;
   if (role !== "admin") {
