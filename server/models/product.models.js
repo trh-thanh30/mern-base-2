@@ -30,10 +30,7 @@ const productSchema = new mongoose.Schema(
       required: [true, "Please enter product quantity"],
       min: 0,
     },
-    images: {
-      type: Array,
-      default: [],
-    },
+    images: [],
     color: {
       type: String,
       required: [true, "Please enter product color"],
