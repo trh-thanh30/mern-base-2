@@ -245,6 +245,17 @@ const logout = (req, res) => {
     res.status(500).json({ message: error.message, success: false });
   }
 };
+const getWishList = async (req, res) => {
+  const { id } = req.user;
+  try {
+    const findUser = await User.findById(id).populate("wishlist");
+    res.status(200).json(findUser);
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+
+
 module.exports = {
   registerUser,
   loginUser,
@@ -256,4 +267,5 @@ module.exports = {
   unBlockUser,
   logout,
   loginAdmin,
+  getWishList,
 };
