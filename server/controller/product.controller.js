@@ -2,8 +2,6 @@ const Product = require("../models/product.models");
 const slugify = require("slugify");
 const User = require("../models/user.models");
 const validateMongodbId = require("../utils/validateMongodb");
-const cloudinaryUploadImg = require("../utils/cloudinary");
-const fs = require("fs");
 const createProduct = async (req, res) => {
   const { role } = req.user;
   if (role !== "admin") {
@@ -18,7 +16,6 @@ const createProduct = async (req, res) => {
       price,
       category,
       quantity,
-      images,
       color,
       ratings,
       brand,
@@ -53,6 +50,7 @@ const createProduct = async (req, res) => {
       return res
         .status(400)
         .json({ message: "Please enter product brand", success: false });
+    const images = req.files.map((file) => file.path);
     const newProduct = new Product({
       title,
       description,
@@ -72,6 +70,7 @@ const createProduct = async (req, res) => {
       .status(200)
       .json({ message: "Product created", product: newProduct, success: true });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error.message, success: false });
   }
 };
@@ -263,36 +262,6 @@ const rating = async (req, res) => {
   }
 };
 
-const uploadImages = async (req, res) => {
-  const { role } = req.user;
-  if (role !== "admin")
-    return res.status(401).json({ message: "unauthorized" });
-  const { id } = req.params;
-  validateMongodbId(id);
-  try {
-    const uploader = (path) => cloudinaryUploadImg(path, "images");
-    const urls = [];
-    const files = req.files;
-    for (const file of files) {
-      const { path } = file;
-      const newpath = await uploader(path);
-      urls.push(newpath);
-    }
-    const findProducts = await Product.findByIdAndUpdate(
-      id,
-      {
-        images: urls.map((file) => {
-          return file;
-        }),
-      },
-      { new: true }
-    );
-    res.json(findProducts);
-  } catch (error) {
-    return res.status(500).json({ message: error.message, success: false });
-  }
-};
-
 module.exports = {
   createProduct,
   getProduct,
@@ -301,5 +270,4 @@ module.exports = {
   deleteProduct,
   addToWishList,
   rating,
-  uploadImages,
 };

@@ -1,5 +1,4 @@
 const Blog = require("../models/blog.models");
-const cloudinaryUploadImg = require("../utils/cloudinary");
 const validateMongodbId = require("../utils/validateMongodb");
 const fs = require("fs");
 const createBlog = async (req, res) => {
@@ -22,7 +21,14 @@ const createBlog = async (req, res) => {
       .status(401)
       .json({ message: "Unauthorized user admin", success: false });
   try {
-    const newBlog = await Blog.create(req.body);
+    const images = req.files.map((file) => file.path);
+    const newBlog = new Blog({
+      title,
+      description,
+      images,
+      category,
+    });
+    await newBlog.save();
     res.status(200).json({ message: "Blog created", success: true, newBlog });
   } catch (error) {
     res.status(500).json({ message: error.message, success: false });
@@ -188,36 +194,36 @@ const disLikeBlog = async (req, res) => {
     res.status(200).json(blog);
   }
 };
-const uploadImages = async (req, res) => {
-  const { role } = req.user;
-  if (role !== "admin")
-    return res.status(401).json({ message: "unauthorized" });
-  const { id } = req.params;
-  validateMongodbId(id);
-  try {
-    const uploader = (path) => cloudinaryUploadImg(path, "images");
-    const urls = [];
-    const files = req.files;
-    for (const file of files) {
-      const { path } = file;
-      const newpath = await uploader(path);
-      urls.push(newpath);
-      fs.unlinkSync(path);
-    }
-    const findBlog = await Blog.findByIdAndUpdate(
-      id,
-      {
-        images: urls.map((file) => {
-          return file;
-        }),
-      },
-      { new: true }
-    );
-    res.json(findBlog);
-  } catch (error) {
-    return res.status(500).json({ message: error.message, success: false });
-  }
-};
+// const uploadImages = async (req, res) => {
+//   const { role } = req.user;
+//   if (role !== "admin")
+//     return res.status(401).json({ message: "unauthorized" });
+//   const { id } = req.params;
+//   validateMongodbId(id);
+//   try {
+//     const uploader = (path) => cloudinaryUploadImg(path, "images");
+//     const urls = [];
+//     const files = req.files;
+//     for (const file of files) {
+//       const { path } = file;
+//       const newpath = await uploader(path);
+//       urls.push(newpath);
+//       fs.unlinkSync(path);
+//     }
+//     const findBlog = await Blog.findByIdAndUpdate(
+//       id,
+//       {
+//         images: urls.map((file) => {
+//           return file;
+//         }),
+//       },
+//       { new: true }
+//     );
+//     res.json(findBlog);
+//   } catch (error) {
+//     return res.status(500).json({ message: error.message, success: false });
+//   }
+// };
 
 module.exports = {
   createBlog,
@@ -227,5 +233,5 @@ module.exports = {
   deleteBlog,
   likeBlog,
   disLikeBlog,
-  uploadImages,
+  // uploadImages,
 };
