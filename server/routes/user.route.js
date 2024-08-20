@@ -11,6 +11,7 @@ const {
   logout,
   loginAdmin,
   getWishList,
+  saveAddress,
 } = require("../controller/user.controller");
 const verifyToken = require("../middlewares/verifyToken");
 const router = express.Router();
@@ -20,6 +21,7 @@ router.post("/admin-login", loginAdmin);
 router.get("/users", getAllUser);
 router.get("/user/:id", verifyToken, getUserById);
 router.get("/wish-list", verifyToken, getWishList);
+router.put("/address", verifyToken, saveAddress);
 router.delete("/delete-user/:id", deleteUserBydId);
 router.put("/update-user", verifyToken, updateUser);
 router.put("/block-user/:id", verifyToken, blockUser);

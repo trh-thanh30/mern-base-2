@@ -254,7 +254,22 @@ const getWishList = async (req, res) => {
     return res.status(500).json({ message: error.message, success: false });
   }
 };
-
+// save user address
+const saveAddress = async (req, res) => {
+  const { id } = req.user;
+  try {
+    const updateUser = await User.findByIdAndUpdate(
+      id,
+      {
+        address: req?.body?.address,
+      },
+      { new: true }
+    );
+    res.status(200).json(updateUser);
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
 
 module.exports = {
   registerUser,
@@ -268,4 +283,5 @@ module.exports = {
   logout,
   loginAdmin,
   getWishList,
+  saveAddress,
 };
