@@ -16,6 +16,7 @@ const {
   getUserCart,
   emptyCart,
   applyCoupon,
+  createOrder,
 } = require("../controller/user.controller");
 const verifyToken = require("../middlewares/verifyToken");
 const router = express.Router();
@@ -26,6 +27,7 @@ router.get("/users", getAllUser);
 router.get("/user/:id", verifyToken, getUserById);
 router.post("/cart", verifyToken, userCart);
 router.post("/cart/applycoupon", verifyToken, applyCoupon);
+router.post("/cart/cash-order", verifyToken, createOrder);
 router.get("/wish-list", verifyToken, getWishList);
 router.delete("/empty-cart", verifyToken, emptyCart);
 router.get("/cart-user", verifyToken, getUserCart);

@@ -5,6 +5,8 @@ const jwt = require("jsonwebtoken");
 const Product = require("../models/product.models");
 const Cart = require("../models/cart.models");
 const Coupon = require("../models/coupon.models");
+const Order = require("../models/order.models");
+const uniqid = require("uniqid");
 const registerUser = async (req, res) => {
   try {
     const { firstname, lastname, email, password, mobile } = req.body;
@@ -368,6 +370,48 @@ const applyCoupon = async (req, res) => {
   res.json(totalAfterDiscount);
 };
 
+const createOrder = async (req, res) => {
+  const { COD, couponApplied } = req.body;
+  const { id } = req.user;
+
+  try {
+    if (!COD) return res.status(400).json({ message: "Something went wrong" });
+    const user = await User.findById(id);
+    let userCart = await Cart.findOne({ orderby: user._id });
+    let finalAmout = 0;
+    if (couponApplied && userCart.totalAfterDiscount) {
+      finalAmout = userCart.totalAfterDiscount;
+    } else {
+      finalAmout = userCart.cartTotal;
+    }
+    let newOrder = await new Order({
+      products: userCart.products,
+      paymentIntent: {
+        id: uniqid(),
+        method: "COD",
+        amount: finalAmout,
+        status: "Cash On Delivery",
+        created: Date.now(),
+        currency: "usd",
+      },
+      orderStatus: "Cash On Delivery",
+      orderby: user.id,
+    }).save();
+    let update = userCart.products.map((item) => {
+      return {
+        updateOne: {
+          filter: { _id: item.product._id },
+          update: { $inc: { quantity: -item.count, sold: +item.count } },
+        },
+      };
+    });
+    const updated = await Product.bulkWrite(update, {});
+    res.json({ message: "Order placed successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -385,4 +429,5 @@ module.exports = {
   getUserCart,
   emptyCart,
   applyCoupon,
+  createOrder,
 };
