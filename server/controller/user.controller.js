@@ -46,6 +46,8 @@ const registerUser = async (req, res) => {
     return res.status(500).json({ message: error.message, success: false });
   }
 };
+
+// logIn User
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -85,6 +87,49 @@ const loginUser = async (req, res) => {
     res.status(500).json({ message: error.message, success: false });
   }
 };
+
+// logIn Admin
+const loginAdmin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email)
+      return res
+        .status(400)
+        .json({ message: "Please enter your email", success: false });
+    if (!password) {
+      return res
+        .status(400)
+        .json({ message: "Please enter your password", success: false });
+    }
+    const admin = await User.findOne({ email });
+    if (admin.role !== "admin") throw new Error("Not Authorized");
+    if (!admin)
+      return res
+        .status(404)
+        .json({ message: "User not found", success: false });
+    const isMatch = bcryptjs.compareSync(password, admin.password);
+    if (!isMatch)
+      return res
+        .status(400)
+        .json({ message: "Invalid credentials", success: false });
+    const token = jwt.sign(
+      { id: admin._id, role: admin.role },
+      process.env.JWT_SECRET
+    );
+    const expiryDate = new Date(Date.now() + 3600000);
+    const { password: hashedPassword, ...rest } = admin._doc;
+    res
+      .cookie("access_token", token, {
+        httpOnly: true,
+        expires: expiryDate,
+      })
+      .status(200)
+      .json(rest);
+  } catch (error) {
+    res.status(500).json({ message: error.message, success: false });
+  }
+};
+
 const getAllUser = async (req, res) => {
   try {
     const users = await User.find();
@@ -210,4 +255,5 @@ module.exports = {
   blockUser,
   unBlockUser,
   logout,
+  loginAdmin,
 };
