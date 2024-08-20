@@ -4,6 +4,7 @@ const validateMongodbId = require("../utils/validateMongodb");
 const jwt = require("jsonwebtoken");
 const Product = require("../models/product.models");
 const Cart = require("../models/cart.models");
+const Coupon = require("../models/coupon.models");
 const registerUser = async (req, res) => {
   try {
     const { firstname, lastname, email, password, mobile } = req.body;
@@ -321,6 +322,52 @@ const getUserCart = async (req, res) => {
     return res.status(500).json({ message: error.message, success: false });
   }
 };
+const emptyCart = async (req, res) => {
+  const { id } = req.user;
+  console.log(id);
+  try {
+    const user = await User.findById(id);
+    const cart = await Cart.findOneAndReplace({ orderby: user.id });
+    res.json(cart);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+const applyCoupon = async (req, res) => {
+  const { coupon } = req.body;
+  const { id } = req.user;
+
+  // Tìm coupon hợp lệ
+  const validCoupon = await Coupon.findOne({ name: coupon });
+  if (!validCoupon) return res.status(400).json({ message: "Invalid coupon" });
+
+  // Tìm người dùng theo ID
+  const user = await User.findById(id);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  // Tìm giỏ hàng của người dùng
+  const cart = await Cart.findOne({ orderby: user._id }).populate(
+    "products.product"
+  );
+  if (!cart) return res.status(404).json({ message: "Cart not found" });
+
+  let { products, cartTotal } = cart;
+
+  // Tính toán tổng sau khi giảm giá
+  let totalAfterDiscount = (cartTotal * validCoupon.discount) / 100;
+
+  // Cập nhật giỏ hàng với tổng sau khi giảm giá
+  await Cart.findOneAndUpdate(
+    { orderby: user._id },
+    { totalAfterDiscount },
+    { new: true }
+  );
+
+  // Trả về kết quả
+  res.json(totalAfterDiscount);
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -336,4 +383,6 @@ module.exports = {
   saveAddress,
   userCart,
   getUserCart,
+  emptyCart,
+  applyCoupon,
 };
