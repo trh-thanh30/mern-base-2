@@ -12,6 +12,8 @@ const {
   loginAdmin,
   getWishList,
   saveAddress,
+  userCart,
+  getUserCart,
 } = require("../controller/user.controller");
 const verifyToken = require("../middlewares/verifyToken");
 const router = express.Router();
@@ -20,7 +22,9 @@ router.post("/login", loginUser);
 router.post("/admin-login", loginAdmin);
 router.get("/users", getAllUser);
 router.get("/user/:id", verifyToken, getUserById);
+router.post("/cart", verifyToken, userCart);
 router.get("/wish-list", verifyToken, getWishList);
+router.get("/cart-user", verifyToken, getUserCart);
 router.put("/address", verifyToken, saveAddress);
 router.delete("/delete-user/:id", deleteUserBydId);
 router.put("/update-user", verifyToken, updateUser);
