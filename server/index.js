@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const coockieParser = require("cookie-parser");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
+const cors = require("cors");
 const authRouter = require("./routes/user.route.js");
 const productRouter = require("./routes/product.route.js");
 const blogRouter = require("./routes/blog.route.js");
@@ -15,6 +16,12 @@ const { notFound, errorHandler } = require("./middlewares/errorHanlder.js");
 
 dotenv.config();
 app.use(morgan("dev"));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(coockieParser());
 

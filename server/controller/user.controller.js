@@ -412,6 +412,38 @@ const createOrder = async (req, res) => {
   }
 };
 
+const getOrder = async (req, res) => {
+  const { id } = req.user;
+  try {
+    const order = await Order.findOne({ orderby: id }).populate(
+      "products.product"
+    );
+    res.json(order);
+  } catch (error) {
+    return res.staus(500).json({ message: error.message, success: false });
+  }
+};
+const orderStatus = async (req, res) => {
+  const { role } = req.user;
+  if (role !== "admin") return res.status(400).json({ message: "Admin only" });
+  const { id } = req.params;
+  const { status } = req.body;
+  try {
+    const order = await Order.findByIdAndUpdate(
+      id,
+      { orderStatus: status },
+      {
+        paymentIntent: {
+          status: status,
+        },
+      },
+      { new: true }
+    );
+    res.json(order);
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
 module.exports = {
   registerUser,
   loginUser,
@@ -430,4 +462,6 @@ module.exports = {
   emptyCart,
   applyCoupon,
   createOrder,
+  getOrder,
+  orderStatus,
 };
